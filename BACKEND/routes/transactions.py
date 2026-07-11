@@ -18,7 +18,7 @@ from flask import (
     session,
     flash,
 )
-from services.account_service import deposit, withdraw
+from services.account_service import deposit, withdraw, get_balance
 from services.decorators import login_required
 
 transactions_bp = Blueprint("transactions", __name__)
@@ -77,11 +77,24 @@ def withdraw_funds():
     if request.method == "GET":
         return render_template("withdraw.html")
 
-    raw    = request.form.get("amount", "")
-    amount, parse_error = _parse_amount(raw)
+    raw = request.form.get("amount", "")
 
-    if parse_error:
-        return render_template("withdraw.html", error=parse_error, amount=raw)
+    # Validation check 1: amount field must not be empty
+    if not raw or raw.strip() == "":
+        return render_template("withdraw.html", error="Amount is required", amount=raw)
+
+    # Validation check 2: amount must be a positive number greater than zero
+    try:
+        amount = float(raw.strip())
+    except ValueError:
+        return render_template("withdraw.html", error="Amount must be greater than zero", amount=raw)
+    if amount <= 0:
+        return render_template("withdraw.html", error="Amount must be greater than zero", amount=raw)
+
+    # Validation check 3: amount must not exceed the current balance
+    balance_result = get_balance(session["user_id"])
+    if balance_result.ok and amount > balance_result.data["balance"]:
+        return render_template("withdraw.html", error="Insufficient funds", amount=raw)
 
     result = withdraw(session["user_id"], amount)
 
