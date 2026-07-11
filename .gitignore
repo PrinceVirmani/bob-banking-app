@@ -1,0 +1,31 @@
+# Python virtual environment
+venv/
+.venv/
+env/
+
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# SQLite databases
+*.db
+*.sqlite3
+
+# Pytest cache
+.pytest_cache/
+
+# Bob IDE internals
+.bob/
+
+# Workshop docs folder
+docs/
+
+# OS artefacts
+.DS_Store
+Thumbs.db
+
+# Environment variable files — never commit secrets
+.env
+.env.*

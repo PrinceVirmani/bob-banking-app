@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — SecureBank{% endblock %}
+
+{% block content %}
+
+<!-- Greeting row -->
+<div class="row mb-4">
+  <div class="col">
+    <h4 class="fw-bold mb-0">
+      Good day, {{ full_name.split()[0] }}
+      <span class="text-muted fs-6 fw-normal">· Account Overview</span>
+    </h4>
+  </div>
+</div>
+
+<!-- Balance card + action buttons -->
+<div class="row g-3 mb-4">
+
+  <!-- Balance -->
+  <div class="col-md-5">
+    <div class="card balance-card h-100 border-0 shadow-sm">
+      <div class="card-body d-flex flex-column justify-content-center p-4">
+        <p class="balance-label mb-1">Available Balance</p>
+        <p class="balance-amount mb-0">${{ "{:,.2f}".format(balance) }}</p>
+        <hr class="my-3" />
+        <small class="text-muted">
+          <i class="bi bi-person-badge me-1"></i>{{ full_name }}
+        </small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick actions -->
+  <div class="col-md-7">
+    <div class="card h-100 border-0 shadow-sm">
+      <div class="card-body p-4">
+        <h6 class="card-title text-muted text-uppercase fw-semibold mb-3" style="font-size:0.78rem; letter-spacing:0.8px;">
+          Quick Actions
+        </h6>
+        <div class="d-grid gap-2">
+          <a href="{{ url_for('transactions.deposit_funds') }}"
+             class="btn btn-success btn-lg">
+            <i class="bi bi-arrow-down-circle me-2"></i>Deposit Funds
+          </a>
+          <a href="{{ url_for('transactions.withdraw_funds') }}"
+             class="btn btn-outline-danger btn-lg">
+            <i class="bi bi-arrow-up-circle me-2"></i>Withdraw Funds
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Recent transactions mini-ledger -->
+<div class="card border-0 shadow-sm">
+  <div class="card-header bg-white fw-semibold py-3">
+    <i class="bi bi-clock-history me-2 text-muted"></i>Recent Transactions
+  </div>
+  <div class="card-body p-0">
+    {% if transactions %}
+    <div class="table-responsive">
+      <table class="table table-hover mb-0 align-middle">
+        <thead class="table-light">
+          <tr>
+            <th class="ps-4">Type</th>
+            <th>Amount</th>
+            <th>Balance After</th>
+            <th class="pe-4 text-end">Date &amp; Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for tx in transactions %}
+          <tr>
+            <td class="ps-4">
+              {% if tx.tx_type == 'deposit' %}
+                <span class="badge bg-success-subtle text-success border border-success-subtle">
+                  <i class="bi bi-arrow-down-circle me-1"></i>Deposit
+                </span>
+              {% else %}
+                <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                  <i class="bi bi-arrow-up-circle me-1"></i>Withdrawal
+                </span>
+              {% endif %}
+            </td>
+            <td class="fw-semibold {% if tx.tx_type == 'deposit' %}text-success{% else %}text-danger{% endif %}">
+              {% if tx.tx_type == 'deposit' %}+{% else %}-{% endif %}${{ "{:,.2f}".format(tx.amount) }}
+            </td>
+            <td class="text-muted">${{ "{:,.2f}".format(tx.balance_after) }}</td>
+            <td class="pe-4 text-end text-muted" style="font-size:0.85rem;">{{ tx.created_at }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5 text-muted">
+      <i class="bi bi-inbox" style="font-size:2rem;"></i>
+      <p class="mt-2 mb-0">No transactions yet. Make your first deposit!</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

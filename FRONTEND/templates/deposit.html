@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Deposit Funds — SecureBank{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-sm-10 col-md-7 col-lg-5">
+
+    <!-- Page heading -->
+    <div class="mb-4">
+      <a href="{{ url_for('dashboard.dashboard') }}"
+         class="btn btn-sm btn-outline-secondary mb-3">
+        <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+      </a>
+      <h4 class="fw-bold mb-0">
+        <i class="bi bi-arrow-down-circle-fill text-success me-2"></i>Deposit Funds
+      </h4>
+      <p class="text-muted mt-1">Add money to your account.</p>
+    </div>
+
+    <!-- Error alert -->
+    {% if error %}
+    <div class="alert alert-danger d-flex align-items-center" role="alert">
+      <i class="bi bi-exclamation-triangle-fill me-2 flex-shrink-0"></i>
+      <span>{{ error }}</span>
+    </div>
+    {% endif %}
+
+    <!-- Deposit form -->
+    <div class="card transaction-card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <form method="POST" action="{{ url_for('transactions.deposit_funds') }}" novalidate>
+
+          <div class="mb-4">
+            <label for="amount" class="form-label fw-semibold">Amount (USD)</label>
+            <div class="input-group input-group-lg">
+              <span class="input-group-text">$</span>
+              <input
+                type="number"
+                id="amount"
+                name="amount"
+                class="form-control"
+                placeholder="0.00"
+                value="{{ amount if amount is defined else '' }}"
+                min="0.01"
+                step="0.01"
+                required
+                autofocus
+              />
+            </div>
+            <div class="form-text text-muted">
+              Minimum deposit: $0.01 &nbsp;·&nbsp; Maximum: $1,000,000.00
+            </div>
+          </div>
+
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-success btn-lg">
+              <i class="bi bi-arrow-down-circle me-2"></i>Confirm Deposit
+            </button>
+            <a href="{{ url_for('dashboard.dashboard') }}"
+               class="btn btn-outline-secondary">
+              Cancel
+            </a>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

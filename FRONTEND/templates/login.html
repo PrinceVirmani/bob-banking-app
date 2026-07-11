@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Login — SecureBank{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-sm-10 col-md-7 col-lg-5">
+
+    <!-- Header -->
+    <div class="text-center mb-4">
+      <i class="bi bi-bank2" style="font-size:3rem; color:#3b82d4;"></i>
+      <h2 class="mt-2 fw-bold">SecureBank</h2>
+      <p class="text-muted">Sign in to your account</p>
+    </div>
+
+    <!-- Error alert -->
+    {% if error %}
+    <div class="alert alert-danger d-flex align-items-center" role="alert">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>
+      <span>{{ error }}</span>
+    </div>
+    {% endif %}
+
+    <!-- Login card -->
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <form method="POST" action="{{ url_for('auth.login') }}" novalidate>
+
+          <!-- Username -->
+          <div class="mb-3">
+            <label for="username" class="form-label fw-semibold">Username</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-person"></i></span>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                class="form-control"
+                placeholder="Enter your username"
+                value="{{ request.form.get('username', '') }}"
+                autocomplete="username"
+                required
+              />
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div class="mb-4">
+            <label for="password" class="form-label fw-semibold">Password</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-lock"></i></span>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                class="form-control"
+                placeholder="Enter your password"
+                autocomplete="current-password"
+                required
+              />
+            </div>
+          </div>
+
+          <!-- Submit -->
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primary btn-lg">
+              <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+    <!-- Demo hint (remove in production) -->
+    <div class="text-center mt-3">
+      <small class="text-muted">
+        Demo credentials: <code>alice</code> / <code>password123</code>
+      </small>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
