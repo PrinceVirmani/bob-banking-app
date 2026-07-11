@@ -32,13 +32,13 @@ def _parse_amount(raw: str) -> tuple[float | None, str]:
     Returns (float, '') on success or (None, error_message) on failure.
     """
     if not raw or raw.strip() == "":
-        return None, "Please enter an amount."
+        return None, "Amount is required"
     try:
         value = float(raw.strip())
     except ValueError:
-        return None, "Amount must be a valid number."
+        return None, "Amount must be greater than zero"
     if value <= 0:
-        return None, "Amount must be greater than zero."
+        return None, "Amount must be greater than zero"
     return value, ""
 
 
@@ -77,12 +77,17 @@ def withdraw_funds():
     if request.method == "GET":
         return render_template("withdraw.html")
 
-    raw    = request.form.get("amount", "")
-    amount, parse_error = _parse_amount(raw)
+    raw = request.form.get("amount", "")
 
+    # Validation checks 1 & 2: empty field and non-positive number.
+    # Uses the shared _parse_amount helper for consistency with deposit.
+    amount, parse_error = _parse_amount(raw)
     if parse_error:
         return render_template("withdraw.html", error=parse_error, amount=raw)
 
+    # Call the service — it performs the balance check atomically inside a
+    # single SQLite transaction, preventing any TOCTOU race condition.
+    # Insufficient funds is returned as result.error when balance < amount.
     result = withdraw(session["user_id"], amount)
 
     if not result.ok:
