@@ -18,7 +18,7 @@ from flask import (
     session,
     flash,
 )
-from services.account_service import deposit, withdraw, get_balance
+from services.account_service import deposit, withdraw
 from services.decorators import login_required
 
 transactions_bp = Blueprint("transactions", __name__)
@@ -32,13 +32,13 @@ def _parse_amount(raw: str) -> tuple[float | None, str]:
     Returns (float, '') on success or (None, error_message) on failure.
     """
     if not raw or raw.strip() == "":
-        return None, "Please enter an amount."
+        return None, "Amount is required"
     try:
         value = float(raw.strip())
     except ValueError:
-        return None, "Amount must be a valid number."
+        return None, "Amount must be greater than zero"
     if value <= 0:
-        return None, "Amount must be greater than zero."
+        return None, "Amount must be greater than zero"
     return value, ""
 
 
@@ -79,23 +79,15 @@ def withdraw_funds():
 
     raw = request.form.get("amount", "")
 
-    # Validation check 1: amount field must not be empty
-    if not raw or raw.strip() == "":
-        return render_template("withdraw.html", error="Amount is required", amount=raw)
+    # Validation checks 1 & 2: empty field and non-positive number.
+    # Uses the shared _parse_amount helper for consistency with deposit.
+    amount, parse_error = _parse_amount(raw)
+    if parse_error:
+        return render_template("withdraw.html", error=parse_error, amount=raw)
 
-    # Validation check 2: amount must be a positive number greater than zero
-    try:
-        amount = float(raw.strip())
-    except ValueError:
-        return render_template("withdraw.html", error="Amount must be greater than zero", amount=raw)
-    if amount <= 0:
-        return render_template("withdraw.html", error="Amount must be greater than zero", amount=raw)
-
-    # Validation check 3: amount must not exceed the current balance
-    balance_result = get_balance(session["user_id"])
-    if balance_result.ok and amount > balance_result.data["balance"]:
-        return render_template("withdraw.html", error="Insufficient funds", amount=raw)
-
+    # Call the service — it performs the balance check atomically inside a
+    # single SQLite transaction, preventing any TOCTOU race condition.
+    # Insufficient funds is returned as result.error when balance < amount.
     result = withdraw(session["user_id"], amount)
 
     if not result.ok:
